@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <title>HTML实时预览器</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f4f9;
+        }
+ 
+        .input-section,
+        .preview-section {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+ 
+        textarea {
+            font-family: 'Courier New', Courier, monospace;
+        }
+ 
+        /* 全屏样式 */
+        .preview-section.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background-color: white;
+        }
+ 
+        .preview-section.fullscreen iframe {
+            height: calc(100% - 3rem);
+        }
+ 
+        .input-section.hidden {
+            display: none;
+        }
+    </style>
+</head>
+ 
+<body class="bg-gray-100">
+    <div class="container mx-auto p-8 flex flex-col md:flex-row h-screen gap-8">
+        <!-- 修改输入窗口的宽度，在中等屏幕及以上占 1/3 -->
+        <div class="input-section w-full md:w-1/3 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">输入 HTML 代码</h2>
+                <button id="downloadButton" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                    下载 HTML
+                </button>
+            </div>
+            <textarea id="htmlInput" class="w-full h-full p-4 border border-gray-300 rounded-md resize-none"
+                placeholder="在此输入 HTML 代码"></textarea>
+        </div>
+        <!-- 修改预览窗口的宽度，在中等屏幕及以上占 2/3 -->
+        <div class="preview-section w-full md:w-2/3 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">预览</h2>
+                <button id="fullscreenButton" class="text-gray-600 hover:text-gray-900">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+            <iframe id="preview" class="w-full h-full border border-gray-300 rounded-md" style="width:100%;height:calc(100% - 3rem);"></iframe>
+        </div>
+    </div>
+    <script>
+        const htmlInput = document.getElementById('htmlInput');
+        const preview = document.getElementById('preview');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        const previewSection = document.querySelector('.preview-section');
+        const inputSection = document.querySelector('.input-section');
+        const downloadButton = document.getElementById('downloadButton');
+ 
+        htmlInput.addEventListener('input', () => {
+            const htmlCode = htmlInput.value;
+            const previewWindow = preview.contentWindow.document;
+            previewWindow.open();
+            previewWindow.write(htmlCode);
+            previewWindow.close();
+        });
+ 
+        function toggleFullscreen() {
+            previewSection.classList.toggle('fullscreen');
+            inputSection.classList.toggle('hidden');
+        }
+ 
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+        preview.addEventListener('click', toggleFullscreen);
+ 
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && previewSection.classList.contains('fullscreen')) {
+                toggleFullscreen();
+            }
+        });
+ 
+        downloadButton.addEventListener('click', () => {
+            const htmlCode = htmlInput.value;
+            const blob = new Blob([htmlCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'downloaded_html.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+ 
+</html>
